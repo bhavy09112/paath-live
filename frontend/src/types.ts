@@ -9,7 +9,7 @@ export async function request<T>(path: string, body?: unknown, signal?: AbortSig
   if (!response.ok) {
     let message = `Request failed (${response.status}). Try again.`;
     try { const error = await response.json(); message = typeof error.detail === 'string' ? error.detail : typeof error.message === 'string' ? error.message : message; } catch { /* preserve safe message */ }
-    throw new Error(message);
+    throw new Error(message.replace(/GEMINI_API_KEY/g, 'the teaching API key').replace(/GEMINI_MODEL/g, 'the teaching model').replace(/Gemini/gi, 'the teaching service'));
   }
   return response.json() as Promise<T>;
 }

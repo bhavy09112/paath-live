@@ -2,9 +2,11 @@
 from __future__ import annotations
 
 import base64
+import asyncio
 import hashlib
 import io
 import json
+import logging
 import os
 import re
 import uuid
@@ -142,19 +144,33 @@ async def gemini(prompt: str, output_type: type[BaseModel]):
     }
     try:
         async with httpx.AsyncClient(timeout=75) as client:
-            response = await client.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent", headers={"x-goog-api-key": key}, json=body)
+            for attempt in range(2):
+                response = await client.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent", headers={"x-goog-api-key": key}, json=body)
+                if response.status_code not in {500, 502, 503, 504} or attempt == 1:
+                    break
+                await asyncio.sleep(1)
         if response.status_code != 200:
+            logging.warning("Gemini upstream status=%s", response.status_code)
             status = 429 if response.status_code == 429 else 502
             raise HTTPException(status, "Gemini could not complete this request. Check the configured model, key and quota; then retry.")
         payload = response.json()
-        parts = payload.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+        candidate = (payload.get("candidates") or [{}])[0]
+        finish = candidate.get("finishReason")
+        if finish == "MAX_TOKENS":
+            raise HTTPException(502, "The lesson exceeded the generation limit. Try a shorter section of your material.")
+        if finish in {"SAFETY", "RECITATION", "PROHIBITED_CONTENT"}:
+            raise HTTPException(422, "The provider could not generate this lesson. Try a different source excerpt.")
+        parts = candidate.get("content", {}).get("parts", [])
         text = "".join(part.get("text", "") for part in parts if not part.get("thought"))
         return output_type.model_validate_json(text)
     except HTTPException:
         raise
     except httpx.TimeoutException:
         raise HTTPException(504, "The teacher took too long to respond. Please retry.") from None
-    except (httpx.HTTPError, ValueError, ValidationError, KeyError, IndexError):
+    except ValidationError as error:
+        logging.warning("Lesson validation fields: %s", [(e["loc"], e["type"]) for e in error.errors(include_input=False)])
+        raise HTTPException(502, "The generated lesson did not match the required format. Try a shorter source section.") from None
+    except (httpx.HTTPError, ValueError, KeyError, IndexError):
         raise HTTPException(502, "The teacher returned an incomplete response. Please retry.") from None
 
 
