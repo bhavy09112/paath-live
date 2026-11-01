@@ -1,6 +1,6 @@
 # Proposed architecture and shared boundary
 
-**Planning contract only. These components and routes are not implemented yet.** Check actual code before choosing module locations.
+**Implementation update:** the core is being built in `backend/main.py` and `frontend/`. Gemini Flash replaces Sarvam 105B for planning, feedback and doubts; Sarvam handles speech. `/api/speech` is the implemented synthesis boundary. Custom selections remain unimplemented and return 501. Inspect current code before applying the proposed extension routes below.
 
 ## Core flow
 
@@ -96,4 +96,4 @@ Explicit rights confirmation is an application requirement grounded in Sarvam's 
 - Local storage is single-user and ignored by Git. No shared speech contract or custom voice implementation was changed.
 - `run_services.py` supervises both processes. Ports are fixed for this prototype.
 
-These source-intake routes work; the proposed teaching and speech routes above remain unimplemented. Existing notes are not automatically trustworthy; source review is required before future teaching integration.
+These source-intake routes work. The merged teacher MVP implements teaching and speech in backend/main.py; the port-8766 source-review companion remains a separate intake screen. Existing notes are not automatically trustworthy; source review is required before future teaching integration.

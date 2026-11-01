@@ -2,7 +2,7 @@
 
 Paste this into your AI after cloning this repository:
 
-> Read `AGENTS.md`, `README.md` and `docs/ARCHITECTURE.md`. We are building **Paath Live**, a Sarvam-powered agent that proactively teaches supplied material, asks questions, adapts explanations and resumes after doubts. The repository initially contains documentation; inspect the current code before assuming modules or routes exist.
+> Read `AGENTS.md`, `README.md` and `docs/ARCHITECTURE.md`. We are building **Paath Live**, an agent that proactively teaches supplied material, asks questions, adapts explanations and resumes after doubts. Gemini Flash handles teaching; Sarvam handles speech. Core code is in `backend/` and `frontend/`; inspect it before choosing modules or changing routes.
 >
 > **Your task is only the custom teacher-voice feature:** let the user upload an authorized voice reference recording, create a reusable voice profile, preview it and select it for the teacher's future speech. Do not build or rewrite the lesson controller, PDF processing, assessment or board.
 >

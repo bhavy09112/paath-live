@@ -6,7 +6,29 @@ A teacher-led AI learning experience built around Sarvam AI for the **AI Innovat
 
 Upload a chapter PDF, paste notes, or provide a topic outline. The teacher introduces the lesson, explains concepts aloud, works through examples on a simple visual board, asks the student questions, and adapts its explanation to the student's reasoning. The student can pause, ask a doubt, and resume the lesson.
 
-**Status: two local services implemented: Lecture Studio processing and Paath Live source intake/review. The interactive teaching controller remains planned.**
+**Status: MVP implementation in progress.** Gemini Flash handles lesson planning, teaching, feedback and doubts. Sarvam handles speech. An explicitly labeled scripted sample works without Gemini; live lessons require a Gemini key.
+
+## Run locally
+
+Requirements: Python 3.10+ and Node.js 20.19+ (or a current supported release), plus npm.
+
+```sh
+python -m pip install -r requirements.txt
+npm --prefix frontend install
+npm run dev
+```
+
+Open **http://127.0.0.1:5173**. The API runs on **http://127.0.0.1:8000**. Copy `.env.example` to `.env` if needed and fill `SARVAM_API_KEY` and `GEMINI_API_KEY` server-side. Restart after editing `.env`. `GEMINI_MODEL` is configurable; the current default is `gemini-3.8-flash`. There is no Sarvam LLM fallback.
+
+### Two modes
+
+- **Live:** Gemini creates lessons from supplied PDF/text and handles answers and doubts. A Gemini key is required.
+- **Sample:** a labeled scripted fractions lesson in English/Hindi with rule-based feedback. It is not a live Gemini result. Sarvam speech still uses credits when requested.
+
+Speech starts through lesson controls, and identical text/language/voice requests are cached during the server run. Speech failures leave a clearly labeled text path. Scanned PDFs currently require pasted text; local text extraction accepts readable PDFs up to 8 MB / 30 pages and source text up to 40,000 characters. The app is a local single-user hackathon MVP with in-memory data; do not deploy it publicly without authentication and user isolation.
+
+Checks: `python -m pytest backend tests -q`, `npm run build`, and `npm run check:secrets`. Provider tests use mocks; avoid paid calls in automated checks. See [build notes](docs/BUILD-NOTES.md).
+
 
 ## The demo we want
 
@@ -37,12 +59,12 @@ The teammate owns the recording-upload/custom-voice feature. It must remain inde
 | Capability | Proposed service |
 |---|---|
 | Understand student speech | Saaras speech-to-text |
-| Plan, explain and assess answers | Sarvam 105B |
+| Plan, explain and assess answers | Gemini Flash (user-selected provider) |
 | Speak with a standard voice | Bulbul text-to-speech |
 | Parse scanned/source PDFs when needed | Sarvam Document AI |
 | Use an authorized uploaded voice sample | Optional Sarvam Instant Voice Cloning adapter, owned by teammate |
 
-Sarvam can be the only AI provider. UI, source handling, lesson state, board rendering and playback control are ordinary application work. Exact account access, chosen model versions, latency and output quality need testing with credentials.
+Gemini Flash is the teaching provider; Sarvam is the speech provider. UI, source handling, lesson state, board rendering and playback control are ordinary application work. Gemini behavior needs testing after its key is added. A minimal Sarvam TTS/STT smoke test returned HTTP 200 for each call; that is not a broad accuracy evaluation.
 
 ## Read before building
 
@@ -55,9 +77,9 @@ Sarvam can be the only AI provider. UI, source handling, lesson state, board ren
 
 ## Start collaborating
 
-Clone this repository, create a feature branch, and read `AGENTS.md`. There are no application install/run commands yet because no application has been scaffolded. Do not assume that the proposed routes or modules already exist.
+Clone this repository, create a feature branch, and read `AGENTS.md`. Core code is in `backend/` and `frontend/`. Inspect actual routes before implementing proposed extensions.
 
-Recommended starting stack: React + TypeScript frontend and Python/FastAPI backend. This is a planning choice; the main builder should confirm it in this document when scaffolding the app. Avoid introducing another framework for the voice-upload feature.
+Stack: React + TypeScript/Vite frontend and Python/FastAPI backend. Avoid introducing another framework for the voice-upload feature.
 
 Copy `.env.example` to `.env` for server-side settings when implementation begins. Enter keys locally, never in tracked files or browser code. The checked-in environment example contains placeholders only.
 
@@ -80,13 +102,14 @@ No learning-outcome, accuracy, novelty or performance claims have been measured.
 ```sh
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
+npm --prefix frontend ci
 cp .env.example .env
 # Set SARVAM_API_KEY locally in .env.
 LECTURE_ENV_FILE="$PWD/.env" .venv/bin/python run_services.py
 ```
 
-Requires FFmpeg on PATH. Lecture Studio runs at http://127.0.0.1:8765 and Paath Live at http://127.0.0.1:8766. Upload and process in Lecture Studio, then open Paath Live and import the chosen language. Imports are idempotent snapshots, marked `needs_review`, with the original timestamped transcript alongside generated notes. Importing does not use API credits.
+Requires FFmpeg on PATH. Lecture Studio runs at http://127.0.0.1:8765, source review at http://127.0.0.1:8766, and the interactive Paath teacher at http://127.0.0.1:5173 (API port 8000). Upload and process in Lecture Studio, then open Paath Live and import the chosen language. Imports are idempotent snapshots, marked `needs_review`, with the original timestamped transcript alongside generated notes. Importing does not use API credits.
 
 Set `LECTURE_DATA_DIR` to an absolute existing jobs directory to reuse previous recordings. Defaults to `services/lecture-studio/jobs`. Credentials, recordings, imported sources and generated outputs are ignored by Git. Both services are loopback-only, single-user prototypes; no production authentication is implemented.
 
-The existing notes generator still uses Sarvam. GPT/Gemini integration, diagram generation, MP4 export, learner assessment, custom voice and the interactive lesson controller are not implemented. Generated notes may contain factual/language errors and need review.
+Lecture Studio retains its legacy Sarvam notes generator; the new Paath teacher uses Gemini. Full integration of the notes generator with Gemini remains outstanding. Diagram generation, MP4 export and custom voice remain unimplemented. Generated notes require review. The source-review companion on port 8766 is separate from the interactive teacher on port 5173.

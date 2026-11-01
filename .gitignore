@@ -33,6 +33,8 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 coverage/
+artifacts/
+*.tsbuildinfo
 *.log
 .DS_Store
 Thumbs.db
