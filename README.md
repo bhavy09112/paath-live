@@ -6,7 +6,7 @@ A teacher-led AI learning experience built around Sarvam AI for the **AI Innovat
 
 Upload a chapter PDF, paste notes, or provide a topic outline. The teacher introduces the lesson, explains concepts aloud, works through examples on a simple visual board, asks the student questions, and adapts its explanation to the student's reasoning. The student can pause, ask a doubt, and resume the lesson.
 
-**Status: idea finalized; documentation and collaboration handoff only. No runnable application or live API validation is included yet.**
+**Status: two local services implemented: Lecture Studio processing and Paath Live source intake/review. The interactive teaching controller remains planned.**
 
 ## The demo we want
 
@@ -74,3 +74,19 @@ Natural voice interruptions, larger curricula, class broadcasting, persistent st
 - [Voice cloning overview](https://docs.sarvam.ai/api/api-guides-tutorials/voice-cloning/overview)
 
 No learning-outcome, accuracy, novelty or performance claims have been measured. Demonstrate the implemented behavior and report actual test results.
+
+## Run the integrated local services
+
+```sh
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env.example .env
+# Set SARVAM_API_KEY locally in .env.
+LECTURE_ENV_FILE="$PWD/.env" .venv/bin/python run_services.py
+```
+
+Requires FFmpeg on PATH. Lecture Studio runs at http://127.0.0.1:8765 and Paath Live at http://127.0.0.1:8766. Upload and process in Lecture Studio, then open Paath Live and import the chosen language. Imports are idempotent snapshots, marked `needs_review`, with the original timestamped transcript alongside generated notes. Importing does not use API credits.
+
+Set `LECTURE_DATA_DIR` to an absolute existing jobs directory to reuse previous recordings. Defaults to `services/lecture-studio/jobs`. Credentials, recordings, imported sources and generated outputs are ignored by Git. Both services are loopback-only, single-user prototypes; no production authentication is implemented.
+
+The existing notes generator still uses Sarvam. GPT/Gemini integration, diagram generation, MP4 export, learner assessment, custom voice and the interactive lesson controller are not implemented. Generated notes may contain factual/language errors and need review.

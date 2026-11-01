@@ -85,3 +85,15 @@ Explicit rights confirmation is an application requirement grounded in Sarvam's 
 - Stop/pause cancels browser playback and rejects late audio by response version.
 - Keys and reference recordings remain on the backend. Runtime files stay outside Git.
 - Changing voice affects presentation only; learner answers and lesson progress remain intact.
+
+## Implemented local integration (2026-11-01)
+
+- `services/lecture-studio`: existing recording pipeline, port 8765, Sarvam SDK + FFmpeg.
+- `services/paath-live`: source intake/review service, port 8766, Python standard library.
+- Paath `GET /api/recordings` reads completed Studio `GET /api/jobs` server-to-server.
+- Paath `POST /api/import/{job_id}/{language}` imports notes, slides and timestamped transcript from Studio's `/jobs/` routes. Repeated imports return the saved snapshot.
+- Paath `GET /api/sources` lists snapshots. All enter `needs_review`; this is not a learner proficiency state.
+- Local storage is single-user and ignored by Git. No shared speech contract or custom voice implementation was changed.
+- `run_services.py` supervises both processes. Ports are fixed for this prototype.
+
+These source-intake routes work; the proposed teaching and speech routes above remain unimplemented. Existing notes are not automatically trustworthy; source review is required before future teaching integration.
