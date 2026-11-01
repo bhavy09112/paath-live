@@ -2,7 +2,7 @@
 
 ## Product and current state
 
-Build **Paath Live**, the teacher-led Sarvam learning experience described in README.md and docs/PRODUCT.md. This checkout begins as documentation only. Inspect the current branch before assuming any planned code, route or dependency exists.
+Build **Paath Live**, the teacher-led learning experience described in README.md and docs/PRODUCT.md. Core code is in `backend/` and `frontend/`; inspect the current branch before assuming a proposed extension route exists.
 
 The user finalized the education concept. Earlier commerce ideas are not the product. The agent proactively teaches a supplied lesson, checks student reasoning, repairs misconceptions and resumes after doubts.
 
@@ -23,7 +23,7 @@ The user finalized the education concept. Earlier commerce ideas are not the pro
 4. Add one convincing misconception repair and transfer question.
 5. Integrate optional custom voice through the shared boundary.
 
-Use Sarvam as the AI provider. Do not add an external AI service merely to fill a feature that ordinary application code can implement. Keep the initial architecture small. A short chapter does not require an embedding service or vector database.
+Use Gemini Flash for lesson planning, teaching, doubts and answer assessment, as explicitly requested by the user. Sarvam provides speech recognition and synthesis. Do not fall back to a Sarvam LLM. Keep the initial architecture small. A short chapter does not require an embedding service or vector database.
 
 ## Data and credentials
 

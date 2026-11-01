@@ -6,7 +6,28 @@ A teacher-led AI learning experience built around Sarvam AI for the **AI Innovat
 
 Upload a chapter PDF, paste notes, or provide a topic outline. The teacher introduces the lesson, explains concepts aloud, works through examples on a simple visual board, asks the student questions, and adapts its explanation to the student's reasoning. The student can pause, ask a doubt, and resume the lesson.
 
-**Status: idea finalized; documentation and collaboration handoff only. No runnable application or live API validation is included yet.**
+**Status: MVP implementation in progress.** Gemini Flash handles lesson planning, teaching, feedback and doubts. Sarvam handles speech. An explicitly labeled scripted sample works without Gemini; live lessons require a Gemini key.
+
+## Run locally
+
+Requirements: Python 3.10+ and Node.js 20.19+ (or a current supported release), plus npm.
+
+```sh
+python -m pip install -r requirements.txt
+npm --prefix frontend install
+npm run dev
+```
+
+Open **http://127.0.0.1:5173**. The API runs on **http://127.0.0.1:8000**. Copy `.env.example` to `.env` if needed and fill `SARVAM_API_KEY` and `GEMINI_API_KEY` server-side. Restart after editing `.env`. `GEMINI_MODEL` is configurable; the current default is `gemini-3.8-flash`. There is no Sarvam LLM fallback.
+
+### Two modes
+
+- **Live:** Gemini creates lessons from supplied PDF/text and handles answers and doubts. A Gemini key is required.
+- **Sample:** a labeled scripted fractions lesson in English/Hindi with rule-based feedback. It is not a live Gemini result. Sarvam speech still uses credits when requested.
+
+Speech starts through lesson controls, and identical text/language/voice requests are cached during the server run. Speech failures leave a clearly labeled text path. Scanned PDFs currently require pasted text; local text extraction accepts readable PDFs up to 8 MB / 30 pages and source text up to 40,000 characters. The app is a local single-user hackathon MVP with in-memory data; do not deploy it publicly without authentication and user isolation.
+
+Checks: `python -m pytest backend tests -q`, `npm run build`, and `npm run check:secrets`. Provider tests use mocks; avoid paid calls in automated checks. See [build notes](docs/BUILD-NOTES.md).
 
 ## The demo we want
 
@@ -37,12 +58,12 @@ The teammate owns the recording-upload/custom-voice feature. It must remain inde
 | Capability | Proposed service |
 |---|---|
 | Understand student speech | Saaras speech-to-text |
-| Plan, explain and assess answers | Sarvam 105B |
+| Plan, explain and assess answers | Gemini Flash (user-selected provider) |
 | Speak with a standard voice | Bulbul text-to-speech |
 | Parse scanned/source PDFs when needed | Sarvam Document AI |
 | Use an authorized uploaded voice sample | Optional Sarvam Instant Voice Cloning adapter, owned by teammate |
 
-Sarvam can be the only AI provider. UI, source handling, lesson state, board rendering and playback control are ordinary application work. Exact account access, chosen model versions, latency and output quality need testing with credentials.
+Gemini Flash is the teaching provider; Sarvam is the speech provider. UI, source handling, lesson state, board rendering and playback control are ordinary application work. Gemini behavior needs testing after its key is added. A minimal Sarvam TTS/STT smoke test returned HTTP 200 for each call; that is not a broad accuracy evaluation.
 
 ## Read before building
 
@@ -55,9 +76,9 @@ Sarvam can be the only AI provider. UI, source handling, lesson state, board ren
 
 ## Start collaborating
 
-Clone this repository, create a feature branch, and read `AGENTS.md`. There are no application install/run commands yet because no application has been scaffolded. Do not assume that the proposed routes or modules already exist.
+Clone this repository, create a feature branch, and read `AGENTS.md`. Core code is in `backend/` and `frontend/`. Inspect actual routes before implementing proposed extensions.
 
-Recommended starting stack: React + TypeScript frontend and Python/FastAPI backend. This is a planning choice; the main builder should confirm it in this document when scaffolding the app. Avoid introducing another framework for the voice-upload feature.
+Stack: React + TypeScript/Vite frontend and Python/FastAPI backend. Avoid introducing another framework for the voice-upload feature.
 
 Copy `.env.example` to `.env` for server-side settings when implementation begins. Enter keys locally, never in tracked files or browser code. The checked-in environment example contains placeholders only.
 

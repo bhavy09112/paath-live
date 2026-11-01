@@ -1,6 +1,6 @@
 # Proposed architecture and shared boundary
 
-**Planning contract only. These components and routes are not implemented yet.** Check actual code before choosing module locations.
+**Implementation update:** the core is being built in `backend/main.py` and `frontend/`. Gemini Flash replaces Sarvam 105B for planning, feedback and doubts; Sarvam handles speech. `/api/speech` is the implemented synthesis boundary. Custom selections remain unimplemented and return 501. Inspect current code before applying the proposed extension routes below.
 
 ## Core flow
 
