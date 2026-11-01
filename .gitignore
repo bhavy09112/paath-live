@@ -1,0 +1,42 @@
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime source documents, voice recordings, generated media and metadata
+uploads/
+storage/
+runtime/
+data/
+tmp/
+*.wav
+*.mp3
+*.ogg
+*.webm
+*.m4a
+*.flac
+*.opus
+*.mp4
+
+# Tooling and build output
+node_modules/
+dist/
+build/
+.next/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+
+# Earlier research for discarded concepts; retained locally only
+research/SARVAM-HACKATHON-RESEARCH.md
+research/VALIDATION-DEMO-PLAN.md
